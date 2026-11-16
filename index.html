@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>سيولة قطاعات البورصة المصرية</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: dark;
+  --bg:#0c1016; --card:#131922; --card2:#18202b; --line:#232c39; --line2:#2d3746;
+  --t1:#eef1f5; --t2:#aab3c0; --t3:#77818f;
+  --up:#25c48b; --dn:#f0585e; --neu:#2a313c; --accent:#5aa9ff; --warn:#f2b33d;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--t1);font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding-bottom:40px}
+.num{font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;display:inline-block}
+.up{color:var(--up)} .dn{color:var(--dn)} .mut{color:var(--t3)} .sec{color:var(--t2)}
+header.top{position:sticky;top:0;z-index:20;background:rgba(12,16,22,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.wrap{max-width:780px;margin:0 auto;padding:0 14px}
+.top .wrap{display:flex;flex-direction:column;gap:8px;padding-top:10px;padding-bottom:10px}
+.titlerow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{font-size:19px;margin:0;font-weight:700}
+.stamp{font-size:12px;color:var(--t3)}
+.ctrls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:2px}
+.seg button{background:none;border:0;color:var(--t2);font:inherit;font-size:13px;padding:6px 10px;border-radius:8px;cursor:pointer}
+.seg button.on{background:var(--line2);color:var(--t1)}
+.btn{background:var(--card);border:1px solid var(--line);color:var(--t1);font:inherit;font-size:13px;padding:7px 11px;border-radius:10px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{border-color:var(--line2)}
+.lbl{font-size:12px;color:var(--t3)}
+.banner{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-size:13px;line-height:1.6;border:1px solid}
+.banner.demo{background:rgba(242,179,61,.08);border-color:rgba(242,179,61,.35);color:#f5cf86}
+.banner.err{background:rgba(240,88,94,.08);border-color:rgba(240,88,94,.35);color:#f7a3a6}
+section.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);margin:14px 0;padding:16px 14px}
+.card h2{margin:0 0 4px;font-size:17px;font-weight:700}
+.card .sub{margin:0 0 12px;font-size:12.5px;color:var(--t3);line-height:1.6}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+@media(min-width:620px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.kpi .k{font-size:12px;color:var(--t3)}
+.kpi .v{font-size:21px;font-weight:700;margin-top:4px}
+.kpi .d{font-size:12.5px;margin-top:2px}
+svg text{font-family:inherit}
+.tm-legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin-top:12px}
+.tm-legend div{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);cursor:pointer;min-width:0}
+.tm-legend .ix{min-width:24px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:600}
+.tm-legend .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.scale{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11.5px;color:var(--t3)}
+.scale .bar{flex:1;height:8px;border-radius:4px}
+.quad{border:1px solid var(--line);background:var(--card2);border-radius:14px;padding:12px 12px 6px;margin-bottom:10px}
+.quad h3{margin:0 0 6px;font-size:15px;font-weight:600}
+.quad .hint{font-size:12px;color:var(--t3);margin:-2px 0 6px}
+.qrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:14px;cursor:pointer}
+.qrow:first-of-type{border-top:0}
+.qrow .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qrow .vals{font-size:13px;color:var(--t3);white-space:nowrap}
+.empty{color:var(--t3);font-size:13px;padding:6px 0 10px}
+.flowlist{margin-top:10px}
+.flowlist .fl{display:flex;align-items:center;gap:6px;font-size:13.5px;padding:6px 0;border-top:1px solid var(--line)}
+.flowlist .fl:first-child{border-top:0}
+.flowlist .amt{margin-inline-start:auto;color:var(--t2);font-size:13px}
+.rowbar{display:grid;grid-template-columns:118px 1fr 64px;align-items:center;gap:8px;padding:5px 0;font-size:13px;cursor:pointer}
+.rowbar .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t2)}
+.rowbar .val{text-align:left;font-size:12.5px}
+.track{position:relative;height:16px}
+.track .zero{position:absolute;top:-3px;bottom:-3px;left:50%;width:1px;background:var(--line2)}
+.track .b{position:absolute;top:2px;height:12px;border-radius:4px}
+.stack{display:flex;height:14px;border-radius:4px;overflow:hidden;gap:2px}
+.stack span{display:block;height:100%}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--t2);margin-bottom:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:5px;vertical-align:-1px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+.tblwrap{overflow-x:auto;margin:0 -4px}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--t3);font-weight:500;font-size:12px;cursor:pointer;user-select:none;position:sticky;top:0;background:var(--card)}
+th.sorted{color:var(--t1)}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--card2)}
+.tag{font-size:11.5px;padding:2px 7px;border-radius:999px;border:1px solid var(--line2);color:var(--t2)}
+.tag.acc{border-color:rgba(37,196,139,.45);color:var(--up)}
+.tag.dis{border-color:rgba(240,88,94,.45);color:var(--dn)}
+.tag.wk{border-color:rgba(242,179,61,.4);color:var(--warn)}
+.hm{display:grid;gap:2px;font-size:11px;align-items:center}
+.hm .c{height:22px;border-radius:4px;cursor:default}
+.hm .rl{color:var(--t2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-inline-end:6px;cursor:pointer}
+.hm .hd{color:var(--t3);font-size:10px;text-align:center;direction:ltr;overflow:visible;white-space:nowrap;min-width:0}
+.streak{font-size:11.5px;text-align:center}
+#tip{position:fixed;z-index:60;pointer-events:none;background:#0a0e13;border:1px solid var(--line2);border-radius:10px;padding:8px 10px;font-size:12.5px;line-height:1.6;max-width:260px;box-shadow:0 8px 24px rgba(0,0,0,.45);opacity:0;transition:opacity .12s}
+#tip.on{opacity:1}
+#tip b{font-weight:600}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:none}
+.sheet-bg.on{display:block}
+.sheet{position:fixed;z-index:55;left:0;right:0;bottom:0;max-height:86vh;overflow:auto;background:var(--card);border-top:1px solid var(--line2);border-radius:20px 20px 0 0;padding:16px 16px 28px;transform:translateY(105%);transition:transform .22s ease}
+.sheet{visibility:hidden}.sheet.on{transform:none;visibility:visible}
+@media(min-width:780px){.sheet{max-width:760px;margin:0 auto}}
+.sheet .hdl{width:40px;height:4px;border-radius:2px;background:var(--line2);margin:0 auto 12px}
+.sheet h3{margin:0;font-size:18px}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.mini div{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:8px;font-size:12px;color:var(--t3)}
+.mini b{display:block;font-size:15px;color:var(--t1);margin-top:2px}
+.stk{display:grid;grid-template-columns:62px 1fr auto;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.stk .sb{height:6px;border-radius:3px;background:var(--accent);opacity:.8}
+.stk .tk{font-weight:600;direction:ltr;text-align:right}
+.stk .meta{font-size:11.5px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:11px;padding:1px 6px;border-radius:6px;background:rgba(90,169,255,.14);color:var(--accent);margin-inline-start:4px}
+details.method{font-size:13px;color:var(--t2);line-height:1.8}
+details.method summary{cursor:pointer;color:var(--t1);font-weight:600;font-size:15px}
+details.method code{background:var(--card2);padding:1px 5px;border-radius:5px;font-size:12px;direction:ltr;unicode-bidi:isolate}
+.foot{font-size:11.5px;color:var(--t3);text-align:center;margin-top:18px;line-height:1.7}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="titlerow">
+      <h1>سيولة القطاعات · EGX</h1>
+      <span class="stamp" id="stamp">—</span>
+    </div>
+    <div class="ctrls">
+      <span class="lbl">مقارنة بمتوسط</span>
+      <div class="seg" id="baseSeg" role="group" aria-label="فترة المقارنة">
+        <button data-v="av10">10 أيام</button><button data-v="av30" class="on">30 يوم</button><button data-v="av60">60 يوم</button>
+      </div>
+      <button class="btn" id="refreshBtn" title="تحديث">⟳ تحديث</button>
+      <label class="btn" title="تحميل ملفات latest.json / history.json">⤒ ملف بيانات<input id="fileIn" type="file" accept=".json,application/json" multiple hidden></label>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner"></div>
+  <div class="kpis" id="kpis"></div>
+
+  <section class="card" id="sec-treemap">
+    <h2>الفلوس رايحة على أنهي قطاع</h2>
+    <p class="sub">حجم المربع = نصيب القطاع من قيمة تداول السوق اليوم. اللون = سيولة القطاع مقارنة بمتوسطه (أخضر أعلى من المعتاد، أحمر أقل). اضغط على أي قطاع لتفاصيله.</p>
+    <div id="treemap"></div>
+    <div class="scale"><span>أقل من المعتاد</span><div class="bar" id="scaleBar"></div><span>أعلى من المعتاد</span></div>
+    <div class="tm-legend" id="tmLegend"></div>
+  </section>
+
+  <section class="card" id="sec-quad">
+    <h2>السيولة مقابل حركة الأسعار</h2>
+    <p class="sub">كل قطاع في خانة حسب سيولته مقارنة بالمعتاد واتجاه سعره (متوسط مرجّح بالقيمة السوقية).</p>
+    <div id="quads"></div>
+  </section>
+
+  <section class="card" id="sec-flow">
+    <h2>الفلوس جاية منين ورايحة فين</h2>
+    <p class="sub">دوران السيولة: القطاعات اللي نصيبها من تداول السوق قلّ عن المعتاد (يمين) مقابل اللي نصيبها زاد (شمال). المبالغ تقديرية بالجنيه.</p>
+    <div id="flow"></div>
+    <div class="flowlist" id="flowList"></div>
+  </section>
+
+  <section class="card" id="sec-mf">
+    <h2>صافي التدفق: ضغط شراء أم بيع؟</h2>
+    <p class="sub">بيقيس قفل كل سهم بالنسبة لمدى اليوم مضروب في قيمة تداوله (فكرة Chaikin Money Flow). موجب = القفل قريب من أعلى سعر والشراء غالب.</p>
+    <div id="mf"></div>
+  </section>
+
+  <section class="card" id="sec-rot">
+    <h2>خريطة الدوران</h2>
+    <p class="sub">المحور الأفقي: تغيّر السيولة عن المعتاد. الرأسي: أداء القطاع. حجم الدائرة = نصيبه من التداول.</p>
+    <div class="ctrls" style="margin-bottom:8px">
+      <span class="lbl">الأداء</span>
+      <div class="seg" id="perfSeg"><button data-v="ch" class="on">اليوم</button><button data-v="pw">أسبوع</button><button data-v="pm">شهر</button></div>
+    </div>
+    <div id="scatter"></div>
+  </section>
+
+  <section class="card" id="sec-breadth">
+    <h2>اتساع الحركة داخل كل قطاع</h2>
+    <p class="sub">عدد الأسهم الصاعدة والهابطة: هل الصعود واسع ولا سهم واحد شايل القطاع؟</p>
+    <div class="legend"><span><i style="background:var(--up)"></i>صاعد</span><span><i style="background:#56606e"></i>ثابت</span><span><i style="background:var(--dn)"></i>هابط</span></div>
+    <div id="breadth"></div>
+  </section>
+
+  <section class="card" id="sec-unusual">
+    <h2>أسهم عليها سيولة غير عادية</h2>
+    <p class="sub">حجم التداول ضعفين متوسط 10 أيام أو أكثر — غالبًا أول إشارة لدخول أو خروج فلوس كبيرة.</p>
+    <div class="seg" id="unSeg" style="margin-bottom:8px"><button data-v="all" class="on">الكل</button><button data-v="up">صاعدة</button><button data-v="dn">هابطة</button></div>
+    <div id="unusual"></div>
+  </section>
+
+  <section class="card" id="sec-hist">
+    <h2>تاريخ دوران السيولة</h2>
+    <p class="sub">سيولة كل قطاع يوم بيوم مقارنة بمتوسط 30 يوم (الأحدث على اليمين)، وعدد أيام الدخول المتتالية.</p>
+    <div id="hist"></div>
+  </section>
+
+  <section class="card" id="sec-table">
+    <h2>جدول القطاعات</h2>
+    <p class="sub">كل الأرقام في مكان واحد. اضغط على عنوان العمود للترتيب.</p>
+    <div class="tblwrap"><table id="tbl"></table></div>
+  </section>
+
+  <section class="card">
+    <details class="method">
+      <summary>إزاي بنحسب الأرقام؟</summary>
+      <p><b>نصيب القطاع</b> = قيمة تداول أسهم القطاع ÷ قيمة تداول السوق كله.</p>
+      <p><b>تغيّر السيولة</b> = قيمة تداول القطاع اليوم ÷ متوسط قيمة تداوله (متوسط حجم الفترة × السعر) − 1.</p>
+      <p><b>حركة الأسعار</b> = متوسط نسبة تغيّر أسهم القطاع مرجّح بالقيمة السوقية.</p>
+      <p><b>الفلوس جاية منين ورايحة فين</b>: بنقارن نصيب كل قطاع اليوم بنصيبه المعتاد. القطاع اللي نصيبه نزل = فلوس خرجت منه، واللي نصيبه طلع = فلوس دخلته، وبنوزّع الخارج على الداخل بنسبة حجم الدخول. ده تقدير لدوران الاهتمام وليس تتبع فعلي لأوامر بعينها.</p>
+      <p><b>صافي التدفق</b> = Σ [((الإغلاق − الأدنى) − (الأعلى − الإغلاق)) ÷ (الأعلى − الأدنى)] × قيمة التداول ÷ قيمة تداول القطاع.</p>
+      <p><b>التصنيف</b>: تجميع (سيولة أعلى + سعر طالع + تدفق موجب) · تصريف (سيولة أعلى + سعر نازل) · صعود بسيولة ضعيفة · عزوف.</p>
+      <p>تصنيف الأسهم للقطاعات من ملف <code>sectors_map.csv</code> وتقدر تعدّله. البيانات من TradingView وغالبًا متأخرة ~15 دقيقة أثناء الجلسة.</p>
+    </details>
+  </section>
+  <p class="foot">أداة تحليلية للمعلومات فقط وليست توصية بالشراء أو البيع.<br><span id="srcFoot"></span></p>
+</main>
+
+<div id="tip" role="tooltip"></div>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+
+<script>
+/*__EMBED__*/
+(() => {
+"use strict";
+const $ = s => document.querySelector(s);
+const S = { latest:null, history:null, base:"av30", perf:"ch", un:"all", sort:{k:"share",d:-1}, fetched:false, model:null };
+
+const SHORT = {
+  "الأغذية والمشروبات والتبغ":"أغذية ومشروبات",
+  "الرعاية الصحية والأدوية":"الرعاية الصحية",
+  "خدمات ومنتجات صناعية وسيارات":"صناعة وسيارات",
+  "الخدمات المالية غير المصرفية":"مالية غير مصرفية",
+  "المنسوجات والسلع المعمرة":"منسوجات ومعمرة",
+  "الاتصالات والإعلام وتكنولوجيا المعلومات":"اتصالات وتكنولوجيا",
+  "الطاقة والخدمات المساندة":"الطاقة",
+  "المقاولات والإنشاءات الهندسية":"المقاولات",
+  "الموزعون وتجارة التجزئة":"تجارة وتوزيع",
+  "الموارد الأساسية":"الموارد الأساسية",
+};
+const sh = n => SHORT[n] || n;
+const n0 = x => { x = +x; return Number.isFinite(x) ? x : 0; };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+// ---------- formatting
+function egp(x, signed=false){
+  const s = x < 0 ? "−" : (signed && x > 0 ? "+" : "");
+  const a = Math.abs(x);
+  let t;
+  if (a >= 1e9) t = (a/1e9).toFixed(2) + " مليار";
+  else if (a >= 1e6) t = (a/1e6).toFixed(a >= 1e8 ? 0 : 1) + " مليون";
+  else if (a >= 1e3) t = (a/1e3).toFixed(0) + " ألف";
+  else t = a.toFixed(0);
+  const [nv, ...u] = t.split(" ");
+  return "\u2066" + s + nv + "\u2069" + (u.length ? " " + u.join(" ") : "");
+}
+function pct(x, d=1, signed=true){
+  if (x == null || !Number.isFinite(x)) return "—";
+  const s = x > 0 && signed ? "+" : (x < 0 ? "−" : "");
+  return `<span class="num">${s}${Math.abs(x).toFixed(d)}%</span>`;
+}
+const cls = x => x > 0 ? "up" : (x < 0 ? "dn" : "mut");
+
+// ---------- colour: diverging (red ← neutral → green), clamp ±cap
+function mix(a, b, t){
+  const pa = a.match(/\w\w/g).map(h=>parseInt(h,16)), pb = b.match(/\w\w/g).map(h=>parseInt(h,16));
+  return "#" + pa.map((v,i)=>Math.round(v+(pb[i]-v)*t).toString(16).padStart(2,"0")).join("");
+}
+const NEU = "2a313c", UP1 = "0f6e52", UP2 = "14b383", DN1 = "6e2a31", DN2 = "c8414a";
+function divColor(v, cap=60){
+  if (v == null || !Number.isFinite(v)) return "#"+NEU;
+  const t = Math.min(1, Math.abs(v)/cap);
+  if (t < 0.04) return "#"+NEU;
+  return v > 0 ? (t < .5 ? mix(NEU, UP1, t*2) : mix(UP1, UP2, (t-.5)*2))
+               : (t < .5 ? mix(NEU, DN1, t*2) : mix(DN1, DN2, (t-.5)*2));
+}
+$("#scaleBar").style.background = `linear-gradient(to right, #${UP2}, #${UP1}, #${NEU}, #${DN1}, #${DN2})`;
+
+// ---------- model
+function compute(){
+  const L = S.latest; if (!L) return null;
+  const stocks = (L.stocks||[]).map(s => {
+    const c = n0(s.c), vt = n0(s.vt) || n0(s.v)*c;
+    const avgV = n0(s[S.base]) * c;
+    const h = n0(s.h), l = n0(s.l);
+    const clv = h > l ? ((c-l)-(h-c))/(h-l) : 0;
+    return {...s, c, vt, avgV, clv, ch:n0(s.ch), mc:n0(s.mc), rv:n0(s.rv), pw:n0(s.pw), pm:n0(s.pm)};
+  }).filter(s => s.s);
+  const map = new Map();
+  for (const s of stocks){
+    let g = map.get(s.s);
+    if (!g){ g = {name:s.s, V:0, A:0, mc:0, chw:0, pww:0, pmw:0, eq:0, mf:0, up:0, dn:0, fl:0, n:0, stocks:[]}; map.set(s.s, g); }
+    g.V += s.vt; g.A += s.avgV; g.n++; g.stocks.push(s);
+    const w = s.mc > 0 ? s.mc : 0;
+    g.mc += w; g.chw += w*s.ch; g.pww += w*s.pw; g.pmw += w*s.pm; g.eq += s.ch;
+    g.mf += s.clv * s.vt;
+    if (s.ch > 0) g.up++; else if (s.ch < 0) g.dn++; else g.fl++;
+  }
+  const secs = [...map.values()];
+  const VT = secs.reduce((a,g)=>a+g.V,0) || 1, AT = secs.reduce((a,g)=>a+g.A,0) || 1;
+  for (const g of secs){
+    g.share = g.V/VT*100;
+    g.avgShare = g.A/AT*100;
+    g.liq = g.A > 0 ? (g.V/g.A - 1)*100 : null;
+    g.chg = g.mc > 0 ? g.chw/g.mc : g.eq/g.n;
+    g.pw = g.mc > 0 ? g.pww/g.mc : 0;
+    g.pm = g.mc > 0 ? g.pmw/g.mc : 0;
+    g.mfp = g.V > 0 ? g.mf/g.V*100 : 0;
+    g.delta = g.share - g.avgShare;            // percentage points of market turnover
+    g.flowEGP = g.delta/100 * VT;              // estimated EGP rotated in(+)/out(−)
+    g.stocks.sort((a,b)=>b.vt-a.vt);
+    g.top = g.stocks[0]; g.topShare = g.V > 0 && g.top ? g.top.vt/g.V*100 : 0;
+    const liqUp = (g.liq ?? 0) > 0, pUp = g.chg > 0;
+    g.cls = liqUp && pUp ? (g.mfp > 0 ? "acc" : "acc2") : liqUp && !pUp ? "dis" : !liqUp && pUp ? "wk" : "idle";
+  }
+  secs.sort((a,b)=>b.V-a.V);
+  const adv = stocks.filter(s=>s.ch>0).length, dec = stocks.filter(s=>s.ch<0).length;
+  return {stocks, secs, VT, AT, adv, dec, flat: stocks.length-adv-dec};
+}
+const CLS_LABEL = {acc:["تجميع","acc"], acc2:["صعود بسيولة عالية","acc"], dis:["تصريف","dis"], wk:["صعود بسيولة ضعيفة","wk"], idle:["عزوف",""]};
+
+// ---------- tooltip & sheet
+const tip = $("#tip");
+function showTip(html, x, y){
+  tip.innerHTML = html; tip.classList.add("on");
+  const r = tip.getBoundingClientRect();
+  let left = x + 14, top = y + 14;
+  if (left + r.width > innerWidth - 8) left = x - r.width - 14;
+  if (left < 8) left = 8;
+  if (top + r.height > innerHeight - 8) top = y - r.height - 14;
+  tip.style.left = left+"px"; tip.style.top = top+"px";
+}
+const hideTip = () => tip.classList.remove("on");
+document.addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse") return;
+  const t = e.target.closest?.("[data-tip]");
+  if (t) showTip(t.getAttribute("data-tip"), e.clientX, e.clientY); else hideTip();
+});
+document.addEventListener("click", e => {
+  const s = e.target.closest?.("[data-sec]");
+  if (s){ openSheet(s.getAttribute("data-sec")); return; }
+  const t = e.target.closest?.("[data-tip]");
+  if (t && e.pointerType !== "mouse"){ const r = t.getBoundingClientRect(); showTip(t.getAttribute("data-tip"), r.left + r.width/2, r.top); setTimeout(hideTip, 2600); }
+});
+function secTip(g){
+  return `<b>${esc(g.name)}</b><br>قيمة التداول: ${egp(g.V)} ج<br>النصيب: ${pct(g.share,1,false)} (المعتاد ${pct(g.avgShare,1,false)})<br>السيولة مقابل المعتاد: <span class="${cls(g.liq)}">${pct(g.liq,0)}</span><br>حركة الأسعار: <span class="${cls(g.chg)}">${pct(g.chg,2)}</span><br>صافي التدفق: <span class="${cls(g.mfp)}">${pct(g.mfp,0)}</span>`;
+}
+function openSheet(name){
+  hideTip();
+  const g = S.model?.secs.find(x=>x.name===name); if (!g) return;
+  const [lab, lc] = CLS_LABEL[g.cls];
+  const maxV = g.stocks[0]?.vt || 1;
+  $("#sheet").innerHTML = `<div class="hdl"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h3>${esc(g.name)}</h3><span class="tag ${lc}">${lab}</span></div>
+    <div class="mini">
+      <div>قيمة التداول<b>${egp(g.V)}</b></div>
+      <div>النصيب من السوق<b>${pct(g.share,1,false)}</b></div>
+      <div>السيولة مقابل المعتاد<b class="${cls(g.liq)}">${pct(g.liq,0)}</b></div>
+      <div>حركة الأسعار<b class="${cls(g.chg)}">${pct(g.chg,2)}</b></div>
+      <div>صافي التدفق<b class="${cls(g.mfp)}">${pct(g.mfp,0)}</b></div>
+      <div>صاعد / هابط<b><span class="up num">${g.up}</span> / <span class="dn num">${g.dn}</span></b></div>
+    </div>
+    <p class="sub" style="margin:0 0 6px">${g.topShare >= 40 ? `⚠︎ سيولة القطاع متركزة: <b>${esc(g.top.t)}</b> لوحده ${pct(g.topShare,0,false)} من تداول القطاع.` : `السيولة موزعة؛ أكبر سهم ${esc(g.top?.t||"")} = ${pct(g.topShare,0,false)} من تداول القطاع.`}</p>
+    ${g.stocks.slice(0,40).map(s=>`<div class="stk">
+        <div><div class="tk">${esc(s.t)}</div></div>
+        <div><div class="meta">${esc(s.n && s.n!==s.t ? s.n : "")} ${s.rv>=2?`<span class="badge">حجم ×${s.rv.toFixed(1)}</span>`:""}</div><div class="sb" style="width:${Math.max(2,s.vt/maxV*100)}%"></div></div>
+        <div style="text-align:left"><div style="font-size:13px">${egp(s.vt)}</div><div class="${cls(s.ch)}" style="font-size:12px">${pct(s.ch,2)}</div></div>
+      </div>`).join("")}
+    <div style="margin-top:14px;text-align:center"><button class="btn" id="closeSheet">إغلاق</button></div>`;
+  $("#sheet").classList.add("on"); $("#sheetBg").classList.add("on");
+  $("#closeSheet").onclick = closeSheet;
+}
+function closeSheet(){ $("#sheet").classList.remove("on"); $("#sheetBg").classList.remove("on"); }
+$("#sheetBg").onclick = closeSheet;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+// ---------- KPIs
+function renderKpis(M){
+  const liq = M.AT > 0 ? (M.VT/M.AT-1)*100 : null;
+  const ix = (S.latest.indices||[]).find(i=>/EGX30$/.test(i.t)) || (S.latest.indices||[])[0];
+  const best = [...M.secs].sort((a,b)=>b.flowEGP-a.flowEGP)[0];
+  const worst = [...M.secs].sort((a,b)=>a.flowEGP-b.flowEGP)[0];
+  $("#kpis").innerHTML = `
+    <div class="kpi"><div class="k">قيمة تداول السوق</div><div class="v">${egp(M.VT)}</div><div class="d ${cls(liq)}">${pct(liq,0)} عن المعتاد</div></div>
+    <div class="kpi"><div class="k">${ix ? esc(ix.n||ix.t) : "المؤشر"}</div><div class="v num">${ix ? n0(ix.c).toLocaleString("en-US",{maximumFractionDigits:0}) : "—"}</div><div class="d ${cls(ix?.ch)}">${ix ? pct(n0(ix.ch),2) : ""}</div></div>
+    <div class="kpi"><div class="k">اتساع السوق</div><div class="v"><span class="up num">${M.adv}</span> <span class="mut" style="font-size:15px">/</span> <span class="dn num">${M.dec}</span></div><div class="d mut">صاعد / هابط · ثابت ${M.flat}</div></div>
+    <div class="kpi" data-sec="${esc(best?.name)}" style="cursor:pointer"><div class="k">أكثر قطاع جاذب للفلوس</div><div class="v" style="font-size:17px">${esc(sh(best?.name||"—"))}</div><div class="d up">${best ? egp(best.flowEGP,true) : ""}</div></div>`;
+}
+
+// ---------- treemap (squarified)
+function squarify(items, X, Y, W, H){
+  const total = items.reduce((a,d)=>a+d.value,0); if (!total) return [];
+  const k = W*H/total; let nodes = items.map(d=>({d, a:d.value*k})), row = [], out = [];
+  let x=X, y=Y, w=W, h=H;
+  const worst = (r, side) => { const s = r.reduce((a,b)=>a+b.a,0); let mx=-1, mn=Infinity; for (const q of r){ mx=Math.max(mx,q.a); mn=Math.min(mn,q.a);} return Math.max(side*side*mx/(s*s), (s*s)/(side*side*mn)); };
+  const lay = r => { const s = r.reduce((a,b)=>a+b.a,0);
+    if (w >= h){ const rw = s/h; let yy=y; for (const q of r){ const rh=q.a/rw; out.push({d:q.d,x,y:yy,w:rw,h:rh}); yy+=rh; } x+=rw; w-=rw; }
+    else { const rh = s/w; let xx=x; for (const q of r){ const rw=q.a/rh; out.push({d:q.d,x:xx,y,w:rw,h:rh}); xx+=rw; } y+=rh; h-=rh; } };
+  while (nodes.length){ const side = Math.min(w,h), n = nodes[0];
+    if (!row.length || worst([...row,n],side) <= worst(row,side)){ row.push(n); nodes.shift(); } else { lay(row); row=[]; } }
+  if (row.length) lay(row);
+  return out;
+}
+function fit(text, px, fs){ const max = Math.floor(px/(fs*0.52)); return text.length <= max ? text : (max > 3 ? text.slice(0,max-1)+"…" : ""); }
+function renderTreemap(M){
+  const el = $("#treemap"); const W = el.clientWidth || 340; const H = Math.round(Math.max(300, Math.min(560, W*1.05)));
+  const items = M.secs.filter(g=>g.V>0).map(g=>({value:g.V, g}));
+  const rects = squarify(items, 0, 0, W, H).map(r => ({...r, x: W - r.x - r.w}));   // mirror for RTL
+  let small = [], idx = 0;
+  const parts = rects.map(r => {
+    const g = r.d.g, G = 1.5, x = r.x+G, y = r.y+G, w = Math.max(0,r.w-2*G), h = Math.max(0,r.h-2*G);
+    const fill = divColor(g.liq); const cx = x+w/2;
+    let label = "";
+    const big = w > 74 && h > 48;
+    if (big){
+      const fs = Math.min(17, Math.max(12, w/9));
+      const nm = fit(sh(g.name), w-10, fs);
+      const lines = [`<text x="${cx}" y="${y+h/2 - (h>84?16:6)}" text-anchor="middle" fill="#fff" font-weight="700" font-size="${fs}">${esc(nm)}</text>`,
+                     `<text x="${cx}" y="${y+h/2 + (h>84?6:12)}" text-anchor="middle" fill="rgba(255,255,255,.78)" font-size="12.5" direction="ltr">${g.share.toFixed(1)}%</text>`];
+      if (h > 84 && g.liq != null) lines.push(`<text x="${cx}" y="${y+h/2+26}" text-anchor="middle" fill="rgba(255,255,255,.9)" font-size="12.5" direction="ltr">${g.liq>0?"+":g.liq<0?"−":""}${Math.abs(g.liq).toFixed(0)}%</text>`);
+      label = lines.join("");
+    } else if (w > 18 && h > 16){
+      idx++; small.push({i:idx, g, fill});
+      label = `<text x="${cx}" y="${y+h/2+4}" text-anchor="middle" fill="#fff" font-size="${Math.min(12,w/2.2)}" direction="ltr">${idx}</text>`;
+    } else { idx++; small.push({i:idx, g, fill}); }
+    return `<g data-sec="${esc(g.name)}" data-tip="${esc(secTip(g))}" style="cursor:pointer"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${Math.min(10,w/4,h/4)}" fill="${fill}"/>${label}</g>`;
+  });
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة نصيب القطاعات من السيولة">${parts.join("")}</svg>`;
+  $("#tmLegend").innerHTML = small.map(s => `<div data-sec="${esc(s.g.name)}"><span class="ix" style="background:${s.fill}">${s.i}</span><span class="nm">${esc(sh(s.g.name))}</span><span class="num mut" style="font-size:12px">${s.g.share.toFixed(1)}%</span></div>`).join("");
+}
+
+// ---------- quadrants
+function renderQuads(M){
+  const Q = [
+    {t:"سيولة أعلى من المعتاد والأسعار طالعة", c:"up", hint:"دخول فلوس حقيقي — أقوى إشارة", f:g=>(g.liq??0)>0 && g.chg>0},
+    {t:"سيولة أعلى من المعتاد والأسعار نازلة", c:"dn", hint:"تصريف أو بيع بقوة", f:g=>(g.liq??0)>0 && g.chg<=0},
+    {t:"سيولة أقل من المعتاد والأسعار طالعة", c:"up", hint:"صعود بدون وقود — محتاج تأكيد", f:g=>(g.liq??0)<=0 && g.chg>0},
+    {t:"سيولة أقل من المعتاد والأسعار نازلة", c:"dn", hint:"عزوف وهدوء", f:g=>(g.liq??0)<=0 && g.chg<=0},
+  ];
+  $("#quads").innerHTML = Q.map(q => {
+    const rows = M.secs.filter(q.f).sort((a,b)=>Math.abs(b.liq??0)-Math.abs(a.liq??0));
+    return `<div class="quad"><h3 class="${q.c}">${q.t}</h3><div class="hint">${q.hint}</div>${rows.length ? rows.map(g=>`
+      <div class="qrow" data-sec="${esc(g.name)}"><span class="nm">${esc(sh(g.name))}</span>
+      <span class="vals"><span class="${cls(g.liq)}">${pct(g.liq,0)}</span> سيولة · <span class="${cls(g.chg)}">${pct(g.chg,2)}</span> حركة أسهمه</span></div>`).join("") : `<div class="empty">—</div>`}</div>`;
+  }).join("");
+}
+
+// ---------- flow (from → to)
+function renderFlow(M){
+  const el = $("#flow"); const W = el.clientWidth || 340;
+  const pick = (arr, k=6) => { arr.sort((a,b)=>Math.abs(b.amt)-Math.abs(a.amt)); if (arr.length <= k) return arr;
+    const top = arr.slice(0,k-1), rest = arr.slice(k-1); return [...top, {name:"قطاعات أخرى", amt: rest.reduce((a,b)=>a+b.amt,0), other:true}]; };
+  const outs = pick(M.secs.filter(g=>g.flowEGP<0).map(g=>({name:g.name, amt:-g.flowEGP})));
+  const ins  = pick(M.secs.filter(g=>g.flowEGP>0).map(g=>({name:g.name, amt:g.flowEGP})));
+  const TOT = ins.reduce((a,b)=>a+b.amt,0);
+  if (!TOT || !outs.length){ el.innerHTML = `<div class="empty">لا يوجد دوران واضح بين القطاعات حاليًا.</div>`; $("#flowList").innerHTML=""; return; }
+  const LBL = Math.min(118, W*0.3), BAR = 8, PAD = 10;
+  const n = Math.max(outs.length, ins.length), H = Math.max(240, n*50);
+  const k = Math.min((H - PAD*(outs.length-1))/TOT, (H - PAD*(ins.length-1))/TOT);
+  const place = (arr) => { const used = arr.reduce((a,b)=>a+b.amt*k,0) + PAD*(arr.length-1); let y = (H-used)/2; for (const d of arr){ d.y = y; d.h = d.amt*k; d.cur = y; y += d.h + PAD; } };
+  place(outs); place(ins);
+  const xFrom = W - LBL - BAR, xTo = LBL + BAR, xm = (xFrom + xTo)/2;
+  const bands = [], list = [];
+  for (const o of outs) for (const i of ins){
+    const f = o.amt * i.amt / TOT, t = f*k; if (t < 0.4) continue;
+    const y0 = o.cur, y1 = i.cur; o.cur += t; i.cur += t;
+    list.push({from:o.name, to:i.name, f});
+    bands.push(`<path d="M${xFrom} ${y0} C${xm} ${y0},${xm} ${y1},${xTo} ${y1} L${xTo} ${y1+t} C${xm} ${y1+t},${xm} ${y0+t},${xFrom} ${y0+t} Z" fill="url(#fg)" opacity=".42"
+      data-tip="${esc(`من <b>${esc(o.name)}</b> ← إلى <b>${esc(i.name)}</b><br>~ ${egp(f)} جنيه`)}" class="band"/>`);
+  }
+  const node = (d, side) => {
+    const x = side==="from" ? xFrom : LBL, tx = side==="from" ? W-2 : LBL-6, anchor = "start";
+    const nm = fit(sh(d.name), LBL-8, 12);
+    return `<g ${d.other?"":`data-sec="${esc(d.name)}"`} style="cursor:pointer" data-tip="${esc(`<b>${esc(d.name)}</b><br>${side==="from"?"خرج منه":"دخل إليه"} ~ ${egp(d.amt)} جنيه`)}">
+      <rect x="${x}" y="${d.y}" width="${BAR}" height="${Math.max(2,d.h)}" rx="3" fill="${side==="from"?"var(--dn)":"var(--up)"}"/>
+      <text x="${tx}" y="${d.y+d.h/2-2}" text-anchor="${anchor}" fill="var(--t1)" font-size="12">${esc(nm)}</text>
+      <text x="${tx}" y="${d.y+d.h/2+13}" text-anchor="${anchor}" fill="${side==="from"?"var(--dn)":"var(--up)"}" font-size="11.5">${side==="from"?"−":"+"}${egp(d.amt)}</text></g>`;
+  };
+  el.innerHTML = `<svg width="${W}" height="${H+22}" viewBox="0 -22 ${W} ${H+22}" role="img" aria-label="دوران السيولة بين القطاعات" style="direction:rtl">
+    <defs><linearGradient id="fg" x1="1" x2="0" y1="0" y2="0"><stop offset="0" stop-color="var(--dn)"/><stop offset="1" stop-color="var(--up)"/></linearGradient></defs>
+    <text x="${W-2}" y="-8" fill="var(--t3)" font-size="11.5" text-anchor="start">خرجت من ←</text>
+    <text x="${LBL-6}" y="-8" fill="var(--t3)" font-size="11.5" text-anchor="start">← دخلت إلى</text>
+    ${bands.join("")}${outs.map(d=>node(d,"from")).join("")}${ins.map(d=>node(d,"to")).join("")}</svg>`;
+  el.querySelectorAll(".band").forEach(b => { b.addEventListener("pointerenter",()=>b.setAttribute("opacity",".8")); b.addEventListener("pointerleave",()=>b.setAttribute("opacity",".42")); });
+  list.sort((a,b)=>b.f-a.f);
+  $("#flowList").innerHTML = list.slice(0,5).map(x=>`<div class="fl"><span class="dn">${esc(sh(x.from))}</span><span class="mut">←</span><span class="up">${esc(sh(x.to))}</span><span class="amt">~ ${egp(x.f)}</span></div>`).join("");
+}
+
+// ---------- money flow bars (diverging, positive extends left = reading direction)
+function divBars(rows, valKey, fmt){
+  const mx = Math.max(1, ...rows.map(r=>Math.abs(r[valKey])));
+  return rows.map(r => { const v = r[valKey], w = Math.abs(v)/mx*50;
+    const pos = v >= 0 ? `right:50%;width:${w}%` : `left:50%;width:${w}%`;
+    return `<div class="rowbar" data-sec="${esc(r.name)}" data-tip="${esc(secTip(r))}"><span class="nm">${esc(sh(r.name))}</span>
+      <div class="track"><div class="zero"></div><div class="b" style="${pos};background:${v>=0?"var(--up)":"var(--dn)"}"></div></div>
+      <span class="val ${cls(v)}">${fmt(v)}</span></div>`; }).join("");
+}
+function renderMF(M){
+  const rows = [...M.secs].filter(g=>g.V>0).sort((a,b)=>b.mfp-a.mfp);
+  $("#mf").innerHTML = divBars(rows, "mfp", v=>pct(v,0));
+}
+
+// ---------- rotation scatter
+function renderScatter(M){
+  const el = $("#scatter"); const W = el.clientWidth || 340, H = Math.round(Math.min(420, Math.max(280, W*0.8)));
+  const P = {l:40, r:12, t:14, b:30};
+  const key = S.perf === "ch" ? "chg" : S.perf;
+  const pts = M.secs.filter(g=>g.V>0 && g.liq!=null);
+  if (!pts.length){ el.innerHTML = `<div class="empty">لا توجد بيانات متوسطات.</div>`; return; }
+  const xs = pts.map(g=>Math.max(-90, Math.min(200, g.liq))), ys = pts.map(g=>g[key]);
+  const xr = Math.max(20, ...xs.map(Math.abs))*1.15, yr = Math.max(0.5, ...ys.map(Math.abs))*1.2;
+  const X = v => P.l + (Math.max(-xr,Math.min(xr,v)) + xr)/(2*xr)*(W-P.l-P.r);
+  const Y = v => P.t + (yr - v)/(2*yr)*(H-P.t-P.b);
+  const maxS = Math.max(...pts.map(g=>g.share));
+  const R = s => 5 + Math.sqrt(s/maxS)*20;
+  const q = (x,y,txt,anchor,c) => `<text x="${x}" y="${y}" font-size="11" fill="${c}" text-anchor="${anchor}" opacity=".85">${txt}</text>`;
+  const ordered = [...pts].sort((a,b)=>b.share-a.share);
+  const labeled = new Set(), boxes = [];
+  for (const g of ordered){
+    const cx = X(Math.min(200,g.liq)), cy = Y(g[key]) - R(g.share) - 8, w = sh(g.name).length*6.2 + 6, b = {x:cx-w/2, y:cy-12, w, h:14};
+    if (b.y < P.t || boxes.some(o => b.x < o.x+o.w && o.x < b.x+b.w && b.y < o.y+o.h && o.y < b.y+b.h)) continue;
+    boxes.push(b); labeled.add(g.name); if (labeled.size >= 9) break;
+  }
+  el.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="خريطة الدوران" style="direction:ltr">
+    <rect x="${X(0)}" y="${P.t}" width="${W-P.r-X(0)}" height="${Y(0)-P.t}" fill="rgba(37,196,139,.06)"/>
+    <rect x="${X(0)}" y="${Y(0)}" width="${W-P.r-X(0)}" height="${H-P.b-Y(0)}" fill="rgba(240,88,94,.06)"/>
+    <line x1="${P.l}" x2="${W-P.r}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--line2)"/>
+    <line x1="${X(0)}" x2="${X(0)}" y1="${P.t}" y2="${H-P.b}" stroke="var(--line2)"/>
+    ${q(W-P.r-4, P.t+12, "تجميع ↗", "end", "var(--up)")}${q(W-P.r-4, H-P.b-6, "تصريف ↘", "end", "var(--dn)")}
+    ${q(P.l+4, P.t+12, "صعود بسيولة ضعيفة", "start", "var(--warn)")}${q(P.l+4, H-P.b-6, "عزوف", "start", "var(--t3)")}
+    <text x="${(W+P.l)/2}" y="${H-6}" font-size="11" fill="var(--t3)" text-anchor="middle">تغيّر السيولة عن المعتاد %</text>
+    <text x="${P.l-6}" y="${Y(0)+4}" font-size="10.5" fill="var(--t3)" text-anchor="end">0</text>
+    <text x="${P.l-6}" y="${P.t+10}" font-size="10.5" fill="var(--t3)" text-anchor="end">+${yr.toFixed(1)}</text>
+    <text x="${P.l-6}" y="${H-P.b}" font-size="10.5" fill="var(--t3)" text-anchor="end">−${yr.toFixed(1)}</text>
+    ${ordered.map(g => { const cx = X(Math.min(200,g.liq)), cy = Y(g[key]), r = R(g.share);
+      return `<g data-sec="${esc(g.name)}" data-tip="${esc(secTip(g))}" style="cursor:pointer">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="${g[key]>=0?"var(--up)":"var(--dn)"}" fill-opacity=".38" stroke="${g[key]>=0?"var(--up)":"var(--dn)"}" stroke-width="1.5"/>
+        <circle cx="${cx}" cy="${cy}" r="${Math.max(r,14)}" fill="transparent"/>
+        ${labeled.has(g.name) ? `<text x="${cx}" y="${cy - r - 4}" font-size="11" fill="var(--t1)" text-anchor="middle" direction="rtl">${esc(sh(g.name))}</text>` : ""}</g>`; }).join("")}
+  </svg>`;
+}
+
+// ---------- breadth
+function renderBreadth(M){
+  $("#breadth").innerHTML = M.secs.filter(g=>g.n>0).sort((a,b)=>(b.up-b.dn)/b.n-(a.up-a.dn)/a.n).map(g => {
+    const u = g.up/g.n*100, f = g.fl/g.n*100, d = g.dn/g.n*100;
+    return `<div class="rowbar" data-sec="${esc(g.name)}" data-tip="${esc(`<b>${esc(g.name)}</b><br>صاعد ${g.up} · ثابت ${g.fl} · هابط ${g.dn}`)}"><span class="nm">${esc(sh(g.name))}</span>
+      <div class="stack">${u?`<span style="width:${u}%;background:var(--up)"></span>`:""}${f?`<span style="width:${f}%;background:#56606e"></span>`:""}${d?`<span style="width:${d}%;background:var(--dn)"></span>`:""}</div>
+      <span class="val num mut">${g.up}/${g.dn}</span></div>`; }).join("");
+}
+
+// ---------- unusual volume
+function renderUnusual(M){
+  let rows = M.stocks.filter(s => s.rv >= 2 && s.vt > 0);
+  if (S.un === "up") rows = rows.filter(s=>s.ch>0); else if (S.un === "dn") rows = rows.filter(s=>s.ch<0);
+  rows.sort((a,b)=>b.vt-a.vt);
+  $("#unusual").innerHTML = rows.length ? `<div class="tblwrap"><table><thead><tr><th>السهم</th><th>القطاع</th><th>قيمة التداول</th><th>الحجم ÷ المتوسط</th><th>التغير</th></tr></thead><tbody>
+    ${rows.slice(0,25).map(s=>`<tr data-sec="${esc(s.s)}"><td><b class="num">${esc(s.t)}</b><div class="mut" style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${esc(s.n!==s.t?s.n:"")}</div></td><td class="sec">${esc(sh(s.s))}</td><td>${egp(s.vt)}</td><td><span class="num">×${s.rv.toFixed(1)}</span></td><td class="${cls(s.ch)}">${pct(s.ch,2)}</td></tr>`).join("")}
+    </tbody></table></div>` : `<div class="empty">مفيش أسهم بحجم غير عادي حاليًا.</div>`;
+}
+
+// ---------- history heatmap
+function renderHistory(M){
+  const el = $("#hist"), H = S.history;
+  const days = H?.days ? Object.keys(H.days).sort() : [];
+  if (days.length < 2){ el.innerHTML = `<div class="empty">التاريخ بيتبني تلقائيًا مع كل يوم بيشتغل فيه الـ collector (محتاج يومين على الأقل).</div>`; $("#sec-hist").classList.toggle("dimmed", true); return; }
+  const W = el.clientWidth || 340;
+  const ND = Math.max(5, Math.min(days.length, Math.floor((W-150)/16), 25));
+  const last = days.slice(-ND);
+  const names = M.secs.map(g=>g.name);
+  const streak = name => { let s = 0, sign = 0;
+    for (let i = days.length-1; i >= 0; i--){ const v = H.days[days[i]].sectors?.[name]?.liq; if (v == null) break; const sg = v > 0 ? 1 : -1; if (!sign) sign = sg; if (sg !== sign) break; s++; }
+    return s * sign; };
+  const cols = `minmax(86px,118px) repeat(${last.length}, minmax(0,1fr)) 46px`;
+  let html = `<div class="hm" style="grid-template-columns:${cols}"><div></div>`;
+  const rev = [...last].reverse(); // newest first (rightmost in RTL)
+  html += rev.map((d,i)=>`<div class="hd">${i % 3 === 0 ? d.slice(8)+"/"+d.slice(5,7) : ""}</div>`).join("") + `<div class="hd">متتالي</div>`;
+  for (const nm of names){
+    html += `<div class="rl" data-sec="${esc(nm)}">${esc(sh(nm))}</div>`;
+    html += rev.map(d => { const v = H.days[d].sectors?.[nm]; const liq = v?.liq;
+      return `<div class="c" style="background:${divColor(liq)}" data-tip="${esc(`<b>${esc(nm)}</b> · ${d}<br>السيولة: ${pct(liq,0)}<br>النصيب: ${pct(v?.share,1,false)}<br>السعر: ${pct(v?.chg,2)}`)}"></div>`; }).join("");
+    const s = streak(nm);
+    html += `<div class="streak ${s>0?"up":"dn"}">${s>0?"▲":"▼"} <span class="num">${Math.abs(s)}</span></div>`;
+  }
+  el.innerHTML = html + `</div><p class="sub" style="margin:10px 0 0">▲ عدد الأيام المتتالية اللي سيولة القطاع فيها أعلى من المعتاد، ▼ أقل من المعتاد.</p>`;
+}
+
+// ---------- table
+function renderTable(M){
+  const C = [
+    {k:"name", t:"القطاع", f:g=>`<b>${esc(sh(g.name))}</b>`},
+    {k:"V", t:"قيمة التداول", f:g=>egp(g.V)},
+    {k:"share", t:"النصيب", f:g=>pct(g.share,1,false)},
+    {k:"delta", t:"تغيّر النصيب", f:g=>`<span class="${cls(g.delta)}">${pct(g.delta,2)}</span>`},
+    {k:"liq", t:"السيولة/المعتاد", f:g=>`<span class="${cls(g.liq)}">${pct(g.liq,0)}</span>`},
+    {k:"chg", t:"السعر اليوم", f:g=>`<span class="${cls(g.chg)}">${pct(g.chg,2)}</span>`},
+    {k:"pw", t:"أسبوع", f:g=>`<span class="${cls(g.pw)}">${pct(g.pw,1)}</span>`},
+    {k:"pm", t:"شهر", f:g=>`<span class="${cls(g.pm)}">${pct(g.pm,1)}</span>`},
+    {k:"mfp", t:"صافي التدفق", f:g=>`<span class="${cls(g.mfp)}">${pct(g.mfp,0)}</span>`},
+    {k:"topShare", t:"تركّز", f:g=>`<span class="${g.topShare>=40?"":"mut"}">${esc(g.top?.t||"")} ${pct(g.topShare,0,false)}</span>`},
+    {k:"cls", t:"التصنيف", f:g=>{ const [l,c]=CLS_LABEL[g.cls]; return `<span class="tag ${c}">${l}</span>`; }},
+  ];
+  const {k, d} = S.sort;
+  const rows = [...M.secs].sort((a,b)=> typeof a[k]==="string" ? d*a[k].localeCompare(b[k],"ar") : d*((a[k]??-1e9)-(b[k]??-1e9)));
+  $("#tbl").innerHTML = `<thead><tr>${C.map(c=>`<th data-k="${c.k}" class="${c.k===k?"sorted":""}">${c.t}${c.k===k?(d>0?" ▲":" ▼"):""}</th>`).join("")}</tr></thead>
+    <tbody>${rows.map(g=>`<tr data-sec="${esc(g.name)}">${C.map(c=>`<td>${c.f(g)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  $("#tbl").querySelectorAll("th").forEach(th => th.onclick = e => { e.stopPropagation(); const kk = th.dataset.k; S.sort = {k:kk, d: S.sort.k===kk ? -S.sort.d : -1}; renderTable(S.model); });
+}
+
+// ---------- orchestrate
+function render(){
+  const L = S.latest;
+  if (!L){ return; }
+  const M = S.model = compute();
+  const t = L.generated_at ? new Date(L.generated_at) : null;
+  $("#stamp").textContent = t ? "آخر تحديث " + t.toLocaleString("ar-EG",{timeZone:"Africa/Cairo",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
+  $("#banner").innerHTML = L.demo ? `<div class="banner demo">⚠︎ دي <b>بيانات تجريبية</b> لعرض شكل الأداة فقط — مش أسعار حقيقية. شغّل <code>collector.py</code> أو ارفع ملف <code>latest.json</code> من زر "ملف بيانات".</div>` : "";
+  $("#srcFoot").textContent = "المصدر: " + (L.source || "—") + " · " + M.stocks.length + " سهم";
+  renderKpis(M); renderTreemap(M); renderQuads(M); renderFlow(M); renderMF(M); renderScatter(M); renderBreadth(M); renderUnusual(M); renderHistory(M); renderTable(M);
+}
+
+async function fetchData(){
+  try {
+    const bust = "?t=" + Date.now();
+    const [a, b] = await Promise.allSettled([fetch("data/latest.json"+bust).then(r=>{ if(!r.ok) throw 0; return r.json(); }),
+                                             fetch("data/history.json"+bust).then(r=>{ if(!r.ok) throw 0; return r.json(); })]);
+    if (a.status === "fulfilled"){ S.latest = a.value; S.fetched = true; }
+    if (b.status === "fulfilled") S.history = b.value;
+    return a.status === "fulfilled";
+  } catch { return false; }
+}
+async function init(){
+  if (window.EMBEDDED){ S.latest = window.EMBEDDED.latest; S.history = window.EMBEDDED.history; }
+  else {
+    const ok = await fetchData();
+    if (!ok){ $("#banner").innerHTML = `<div class="banner err">مش لاقي <code>data/latest.json</code>. شغّل <code>python collector.py</code> جنب الملف ده، أو ارفع الملف من زر "ملف بيانات".</div>`; return; }
+    setInterval(async () => { if (document.visibilityState === "visible" && await fetchData()) render(); }, 5*60*1000);
+  }
+  render();
+}
+
+// controls
+function seg(id, key){ $(id).querySelectorAll("button").forEach(b => b.onclick = () => { $(id).querySelectorAll("button").forEach(x=>x.classList.toggle("on", x===b)); S[key] = b.dataset.v; render(); }); }
+seg("#baseSeg","base"); seg("#perfSeg","perf"); seg("#unSeg","un");
+$("#refreshBtn").onclick = async () => { if (window.EMBEDDED && !S.fetched){ render(); return; } if (await fetchData()) render(); };
+$("#fileIn").onchange = async e => {
+  for (const f of e.target.files){
+    try { const j = JSON.parse(await f.text());
+      if (j.stocks) { S.latest = j; } else if (j.days) { S.history = j; } } catch {}
+  }
+  render(); e.target.value = "";
+};
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => S.model && render(), 150); });
+init();
+})();
+</script>
+</body>
+</html>
